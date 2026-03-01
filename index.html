@@ -5,25 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Restaurant Tycoon Retro Online</title>
     <style>
-        body { margin: 0; background: #111; overflow: hidden; font-family: 'Segoe UI', sans-serif; touch-action: none; color: white; }
+        body { margin: 0; background: #111; overflow: hidden; font-family: sans-serif; touch-action: none; color: white; }
         canvas { display: block; }
-        
-        /* Интерфейс */
         .ui { position: fixed; inset: 0; pointer-events: none; z-index: 100; }
         #hud { position: fixed; top: 15px; left: 15px; font-size: 20px; color: #f1c40f; text-shadow: 2px 2px #000; }
         #timer-ui { position: fixed; top: 15px; right: 15px; font-size: 22px; color: #ff4757; font-weight: bold; }
-        
-        /* Меню */
         .menu { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 3000; flex-direction: column; }
         .leaderboard { margin-top: 15px; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; width: 280px; }
         .leader-item { display: flex; justify-content: space-between; border-bottom: 1px solid #444; padding: 5px 0; font-size: 15px; }
         .leader-item b { color: #2ed573; }
-
-        /* Игровые окна */
         .dialog-box { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #222; border: 3px solid #f1c40f; padding: 20px; display: none; pointer-events: auto; text-align: center; border-radius: 10px; z-index: 2000; }
         .d-btn { padding: 10px 20px; margin: 5px; cursor: pointer; border: none; border-radius: 5px; background: #27ae60; color: white; font-weight: bold; }
         #btn-hit { position: fixed; bottom: 30px; right: 30px; width: 80px; height: 80px; background: #c0392b; border-radius: 50%; display: none; align-items: center; justify-content: center; pointer-events: auto; border: 3px solid #fff; font-weight: bold; }
-        
         .white-screen { position: fixed; inset: 0; background: white; display: none; align-items: center; justify-content: center; z-index: 5000; color: #000; flex-direction: column; text-align: center; }
         #joy-base { position: fixed; bottom: 40px; left: 40px; width: 100px; height: 100px; background: rgba(255,255,255,0.2); border-radius: 50%; display: none; }
         #joy-stick { position: absolute; top: 25px; left: 25px; width: 50px; height: 50px; background: #fff; border-radius: 50%; opacity: 0.5; }
@@ -35,27 +28,23 @@
     <h1 style="color:#f1c40f">RETRO TYCOON ONLINE</h1>
     <input type="text" id="pName" placeholder="Твой ник" style="padding:10px; width:200px; border-radius:5px; border:none; margin-bottom:10px;"><br>
     <button onclick="startGame()" style="padding:15px 40px; background:#27ae60; color:white; border:none; border-radius:10px; font-size:18px; cursor:pointer; font-weight:bold;">ИГРАТЬ</button>
-    
     <div class="leaderboard">
-        <h3 style="margin:0; text-align:center; color:#f1c40f">ТОП-5 МИРА (СЕК)</h3>
-        <div id="leader-list">Загрузка рекордов...</div>
+        <h3 style="margin:0; text-align:center; color:#f1c40f">🏆 ТОП-5 МИРА</h3>
+        <div id="leader-list">Загрузка...</div>
     </div>
 </div>
 
 <div id="dialog-v" class="dialog-box">
-    <h3>ВЫШИБАЛА</h3><p>Плати $10 или взорву всё!</p>
-    <button class="d-btn" onclick="replyV(true)">ОТДАТЬ</button>
-    <button class="d-btn" style="background:#c0392b" onclick="replyV(false)">ОТКАЗАТЬ</button>
+    <h3>ВЫШИБАЛА</h3><p>Плати $10 или ресторан БУМ!</p>
+    <button class="d-btn" onclick="replyV(true)">ПЛАТИТЬ</button>
+    <button class="d-btn" style="background:#c0392b" onclick="replyV(false)">НЕТ</button>
 </div>
-
 <div id="dialog-d" class="dialog-box">
-    <h3>АНДРЮША</h3><p>Крутой ресторан! На чай $25.</p>
-    <button class="d-btn" onclick="collectBonus()">СПАСИБО!</button>
+    <h3>АНДРЮША</h3><p>Твой сервис супер! Держи $25.</p>
+    <button class="d-btn" onclick="collectBonus()">ВЗЯТЬ</button>
 </div>
-
 <div id="ending" class="white-screen">
-    <h1 id="end-title"></h1>
-    <h2 id="final-time"></h2>
+    <h1 id="end-title"></h1><h2 id="final-time"></h2>
     <button onclick="location.reload()" style="padding:10px 20px; cursor:pointer;">В МЕНЮ</button>
 </div>
 
@@ -69,12 +58,13 @@
 <canvas id="game"></canvas>
 
 <script>
-// --- ОНЛАЙН СИСТЕМА (JSONBLOB) ---
-const BLOB_URL = "https://jsonblob.com/api/jsonBlob/1214154443425431552";
+// --- ИСПРАВЛЕННЫЕ РЕКОРДЫ ---
+const MY_ID = '3cd0e84787ad89d5aa8f'; 
+const URL = `https://api.npoint.io/${MY_ID}`;
 
 async function loadGlobalLeaderboard() {
     try {
-        const res = await fetch(BLOB_URL);
+        const res = await fetch(URL + "?nocache=" + Math.random());
         const runs = await res.json();
         if (Array.isArray(runs)) {
             runs.sort((a, b) => a.time - b.time);
@@ -82,36 +72,33 @@ async function loadGlobalLeaderboard() {
                 `<div class="leader-item"><span>${i+1}. ${r.name}</span> <b>${r.time}s</b></div>`
             ).join('');
         }
-    } catch (e) {
-        document.getElementById('leader-list').innerHTML = "Будь первым в топе!";
-    }
+    } catch (e) { document.getElementById('leader-list').innerHTML = "Рекордов пока нет!"; }
 }
 
 async function saveGlobalRun(seconds) {
     try {
-        const resGet = await fetch(BLOB_URL);
+        const resGet = await fetch(URL + "?nocache=" + Math.random());
         let runs = await resGet.json();
         if (!Array.isArray(runs)) runs = [];
 
         runs.push({ name: playerName, time: seconds });
         runs.sort((a, b) => a.time - b.time);
-        runs = runs.slice(0, 10); // Храним топ-10
+        runs = runs.slice(0, 10);
 
-        await fetch(BLOB_URL, {
-            method: 'PUT',
+        await fetch(URL, {
+            method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(runs)
         });
-        console.log("Рекорд сохранен!");
-    } catch (e) { console.error("Ошибка сохранения"); }
+        setTimeout(loadGlobalLeaderboard, 1000);
+    } catch (e) { console.error("Ошибка сети"); }
 }
 
 loadGlobalLeaderboard();
 
-// --- ИГРОВОЙ ДВИЖОК ---
+// --- ЛОГИКА ИГРЫ ---
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
-
 let isStarted = false, money = 0, playerName = "", hasBat = false;
 let kills = 0, totalLvl = 0, startTime = 0, refusedVyshibala = false, hitAnim = 0;
 
@@ -131,10 +118,8 @@ let items = {
 
 let clients = [];
 
-// Управление
 window.onkeydown = e => keys[e.code] = true;
 window.onkeyup = e => keys[e.code] = false;
-
 window.ontouchstart = e => {
     if (!isStarted) return;
     const t = e.touches[0];
@@ -184,11 +169,9 @@ async function triggerEnd(reason) {
     if(!isStarted) return;
     isStarted = false;
     const finalSecs = Math.floor((Date.now() - startTime)/1000);
-    
     document.getElementById('ending').style.display = 'flex';
-    document.getElementById('final-time').innerText = "ВРЕМЯ: " + finalSecs + "с";
-    document.getElementById('end-title').innerText = reason === "murderer" ? "КОНЦОВКА: УБИЙЦА" : (reason === "vyshibala_boom" ? "КОНЦОВКА: БАБАХ!" : "КОНЦОВКА: МАГНАТ");
-    
+    document.getElementById('final-time').innerText = "РЕЗУЛЬТАТ: " + finalSecs + "с";
+    document.getElementById('end-title').innerText = reason === "win" ? "КОНЦОВКА: МАГНАТ" : (reason === "murderer" ? "КОНЦОВКА: УБИЙЦА" : "КОНЦОВКА: БАБАХ!");
     await saveGlobalRun(finalSecs);
 }
 
@@ -221,11 +204,9 @@ function update() {
     }
     if (player.x + vx > rest.x + 20 && player.x + vx < rest.x + rest.w - 20) player.x += vx;
     if (player.y + vy > rest.y + 20 && player.y + vy < rest.y + rest.h - 20) player.y += vy;
-
     if(!hasBat && player.x > rest.x + rest.w - 70 && player.y > rest.y + rest.h - 70) {
         hasBat = true; document.getElementById('btn-hit').style.display = 'flex';
     }
-
     clients.forEach(c => {
         if (c.state === 'walking') {
             c.x += 1.3;
@@ -245,24 +226,16 @@ function update() {
             if(Math.hypot(c.x - items.kassa.x, c.y - items.kassa.y) < 10) { money += 5; c.state = 'leaving'; }
         } else if (c.state === 'leaving') { c.x -= 2.5; if(c.x < -100) clients = clients.filter(cl => cl !== c); }
     });
-
     if(Object.values(items).every(i => i.lvl >= 5)) triggerEnd(refusedVyshibala ? "vyshibala_boom" : "win");
 }
 
 function draw() {
     ctx.fillStyle = "#111"; ctx.fillRect(0,0, canvas.width, canvas.height);
-    
-    // ПОЛ (РЕТРО)
-    ctx.fillStyle = "#4d3319"; 
-    ctx.fillRect(rest.x, rest.y, rest.w, rest.h);
-    ctx.strokeStyle = "#332211"; ctx.lineWidth = 4; ctx.strokeRect(rest.x, rest.y, rest.w, rest.h);
-
-    // ПРЕДМЕТЫ (ГЕОМЕТРИЯ)
+    ctx.fillStyle = "#4d3319"; ctx.fillRect(rest.x, rest.y, rest.w, rest.h);
     for(let k in items) {
         let it = items[k];
         ctx.fillStyle = it.lvl > 0 ? it.col : "#333";
         ctx.fillRect(it.x, it.y, it.w, it.h);
-        
         ctx.fillStyle = "white"; ctx.font = "bold 14px Arial";
         ctx.fillText(it.name + " ("+it.lvl+")", it.x, it.y - 10);
         if(it.lvl < 5) {
@@ -270,18 +243,8 @@ function draw() {
             ctx.fillText("$" + it.cost, it.x, it.y + it.h + 20);
         }
     }
-
-    // БИТА (КЛАССИКА)
-    if(!hasBat) {
-        ctx.fillStyle = "#f1c40f"; ctx.fillRect(rest.x+rest.w-45, rest.y+rest.h-45, 12, 35);
-    }
-
-    // ЛЮДИ
-    clients.forEach(c => {
-        ctx.fillStyle = c.color; ctx.beginPath(); ctx.arc(c.x, c.y, 18, 0, Math.PI*2); ctx.fill();
-    });
-
-    // ИГРОК
+    if(!hasBat) { ctx.fillStyle = "#f1c40f"; ctx.fillRect(rest.x+rest.w-45, rest.y+rest.h-45, 12, 35); }
+    clients.forEach(c => { ctx.fillStyle = c.color; ctx.beginPath(); ctx.arc(c.x, c.y, 18, 0, Math.PI*2); ctx.fill(); });
     ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(player.x, player.y, player.r, 0, Math.PI*2); ctx.fill();
     if(hasBat) {
         ctx.save(); ctx.translate(player.x, player.y); ctx.rotate(hitAnim > 0 ? 1 : -0.4);
@@ -303,5 +266,4 @@ canvas.onmousedown = e => {
 };
 </script>
 </body>
-  </html>
-  
+</html>
