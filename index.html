@@ -3,68 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Restaurant Tycoon Retro Online</title>
+    <title>Restaurant Tycoon: Pro Edition</title>
     <style>
-        body { margin: 0; background: #111; overflow: hidden; font-family: sans-serif; touch-action: none; color: white; }
+        body { margin: 0; background: #111; overflow: hidden; font-family: 'Segoe UI', sans-serif; touch-action: none; color: white; }
         canvas { display: block; }
         .ui { position: fixed; inset: 0; pointer-events: none; z-index: 100; }
+        
+        /* Склад продуктов */
+        #res-bar { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); padding: 10px; border-radius: 10px; pointer-events: auto; display: flex; gap: 15px; border: 2px solid #555; align-items: center; }
+        .res-item { text-align: center; min-width: 60px; }
+        .res-val { font-weight: bold; font-size: 18px; display: block; }
+        .buy-btn { background: #27ae60; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px; margin-top: 5px; }
+        .buy-btn:active { background: #2ecc71; }
+        #res-timer { text-align: center; color: #ff4757; font-size: 14px; font-weight: bold; margin-top: 2px; }
+
         #hud { position: fixed; top: 15px; left: 15px; font-size: 20px; color: #f1c40f; text-shadow: 2px 2px #000; }
-        #timer-ui { position: fixed; top: 15px; right: 15px; font-size: 22px; color: #ff4757; font-weight: bold; }
+        #timer-ui { position: fixed; top: 15px; right: 15px; font-size: 20px; color: #fff; }
+        
         .menu { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 3000; flex-direction: column; }
-        .leaderboard { margin-top: 15px; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; width: 280px; }
-        .leader-item { display: flex; justify-content: space-between; border-bottom: 1px solid #444; padding: 5px 0; font-size: 15px; }
-        .leader-item b { color: #2ed573; }
+        .leaderboard { margin-top: 15px; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 10px; width: 250px; }
+        .leader-item { display: flex; justify-content: space-between; border-bottom: 1px solid #444; padding: 3px 0; font-size: 14px; }
+        
         .dialog-box { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #222; border: 3px solid #f1c40f; padding: 20px; display: none; pointer-events: auto; text-align: center; border-radius: 10px; z-index: 2000; }
-        .d-btn { padding: 10px 20px; margin: 5px; cursor: pointer; border: none; border-radius: 5px; background: #27ae60; color: white; font-weight: bold; }
-        #btn-hit { position: fixed; bottom: 30px; right: 30px; width: 80px; height: 80px; background: #c0392b; border-radius: 50%; display: none; align-items: center; justify-content: center; pointer-events: auto; border: 3px solid #fff; font-weight: bold; }
-        .white-screen { position: fixed; inset: 0; background: white; display: none; align-items: center; justify-content: center; z-index: 5000; color: #000; flex-direction: column; text-align: center; }
         #joy-base { position: fixed; bottom: 40px; left: 40px; width: 100px; height: 100px; background: rgba(255,255,255,0.2); border-radius: 50%; display: none; }
         #joy-stick { position: absolute; top: 25px; left: 25px; width: 50px; height: 50px; background: #fff; border-radius: 50%; opacity: 0.5; }
+        .white-screen { position: fixed; inset: 0; background: white; display: none; align-items: center; justify-content: center; z-index: 5000; color: #000; flex-direction: column; }
     </style>
 </head>
 <body>
 
 <div id="start-menu" class="menu">
-    <h1 style="color:#f1c40f">RETRO TYCOON ONLINE</h1>
-    <input type="text" id="pName" placeholder="Твой ник" style="padding:10px; width:200px; border-radius:5px; border:none; margin-bottom:10px;"><br>
-    <button onclick="startGame()" style="padding:15px 40px; background:#27ae60; color:white; border:none; border-radius:10px; font-size:18px; cursor:pointer; font-weight:bold;">ИГРАТЬ</button>
+    <h1 style="color:#f1c40f">RESTO TYCOON PRO</h1>
+    <input type="text" id="pName" placeholder="Ник" style="padding:10px; border-radius:5px; border:none; margin-bottom:10px;">
+    <button onclick="startGame()" style="padding:15px 40px; background:#27ae60; color:white; border:none; border-radius:10px; font-size:18px; font-weight:bold;">ИГРАТЬ</button>
     <div class="leaderboard">
-        <h3 style="margin:0; text-align:center; color:#f1c40f">🏆 ТОП-5 МИРА</h3>
+        <h3 style="margin:0; text-align:center; color:#f1c40f">ТОП ЛИДЕРОВ</h3>
         <div id="leader-list">Загрузка...</div>
     </div>
 </div>
 
-<div id="dialog-v" class="dialog-box">
-    <h3>ВЫШИБАЛА</h3><p>Плати $10 или ресторан БУМ!</p>
-    <button class="d-btn" onclick="replyV(true)">ПЛАТИТЬ</button>
-    <button class="d-btn" style="background:#c0392b" onclick="replyV(false)">НЕТ</button>
-</div>
-<div id="dialog-d" class="dialog-box">
-    <h3>АНДРЮША</h3><p>Твой сервис супер! Держи $25.</p>
-    <button class="d-btn" onclick="collectBonus()">ВЗЯТЬ</button>
-</div>
 <div id="ending" class="white-screen">
-    <h1 id="end-title"></h1><h2 id="final-time"></h2>
-    <button onclick="location.reload()" style="padding:10px 20px; cursor:pointer;">В МЕНЮ</button>
+    <h1 id="end-title">ПОБЕДА!</h1>
+    <h2 id="final-time"></h2>
+    <button onclick="location.reload()" style="padding:10px 20px;">В МЕНЮ</button>
 </div>
 
 <div class="ui">
-    <div id="hud">$ <span id="balance">0</span> | +<span id="income">1</span>/с</div>
+    <div id="hud">$ <span id="balance">0</span></div>
+    
+    <div id="res-bar">
+        <div class="res-item">
+            <span>🥗 Салат</span>
+            <span class="res-val" id="val-salad">5</span>
+            <button class="buy-btn" onclick="buyRes('salad')">+$10</button>
+        </div>
+        <div class="res-item">
+            <span>🧀 Сыр</span>
+            <span class="res-val" id="val-cheese">5</span>
+            <button class="buy-btn" onclick="buyRes('cheese')">+$12</button>
+        </div>
+        <div class="res-item">
+            <span>🥩 Колб.</span>
+            <span class="res-val" id="val-meat">5</span>
+            <button class="buy-btn" onclick="buyRes('meat')">+$15</button>
+        </div>
+        <div style="border-left: 1px solid #444; padding-left: 10px;">
+            <div id="res-timer">15s</div>
+            <div style="font-size: 10px; color: #aaa;">ДО РАСХОДА</div>
+        </div>
+    </div>
+
     <div id="timer-ui">⏱ <span id="timer-val">0</span>с</div>
     <div id="joy-base"><div id="joy-stick"></div></div>
-    <div id="btn-hit">УДАР!</div>
 </div>
 
 <canvas id="game"></canvas>
 
 <script>
-// --- ИСПРАВЛЕННЫЕ РЕКОРДЫ ---
 const MY_ID = '3cd0e84787ad89d5aa8f'; 
 const URL = `https://api.npoint.io/${MY_ID}`;
 
+// Ресурсы
+let resData = { salad: 5, cheese: 5, meat: 5 };
+let resTimer = 15;
+
 async function loadGlobalLeaderboard() {
     try {
-        const res = await fetch(URL + "?nocache=" + Math.random());
+        const res = await fetch(URL + "?t=" + Date.now());
         const runs = await res.json();
         if (Array.isArray(runs)) {
             runs.sort((a, b) => a.time - b.time);
@@ -72,198 +97,160 @@ async function loadGlobalLeaderboard() {
                 `<div class="leader-item"><span>${i+1}. ${r.name}</span> <b>${r.time}s</b></div>`
             ).join('');
         }
-    } catch (e) { document.getElementById('leader-list').innerHTML = "Рекордов пока нет!"; }
+    } catch (e) { document.getElementById('leader-list').innerHTML = "Играй первым!"; }
 }
 
 async function saveGlobalRun(seconds) {
     try {
-        const resGet = await fetch(URL + "?nocache=" + Math.random());
+        const resGet = await fetch(URL + "?t=" + Date.now());
         let runs = await resGet.json();
         if (!Array.isArray(runs)) runs = [];
-
         runs.push({ name: playerName, time: seconds });
         runs.sort((a, b) => a.time - b.time);
-        runs = runs.slice(0, 10);
-
-        await fetch(URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(runs)
-        });
-        setTimeout(loadGlobalLeaderboard, 1000);
-    } catch (e) { console.error("Ошибка сети"); }
+        await fetch(URL, { method: 'POST', body: JSON.stringify(runs.slice(0, 10)) });
+    } catch (e) { console.log(e); }
 }
 
-loadGlobalLeaderboard();
+function buyRes(type) {
+    let prices = { salad: 10, cheese: 12, meat: 15 };
+    if (money >= prices[type]) {
+        money -= prices[type];
+        resData[type] += 5;
+        updateResUI();
+    }
+}
 
-// --- ЛОГИКА ИГРЫ ---
+function updateResUI() {
+    document.getElementById('val-salad').innerText = resData.salad;
+    document.getElementById('val-cheese').innerText = resData.cheese;
+    document.getElementById('val-meat').innerText = resData.meat;
+    document.getElementById('balance').innerText = Math.floor(money);
+}
+
+// Логика игры
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
-let isStarted = false, money = 0, playerName = "", hasBat = false;
-let kills = 0, totalLvl = 0, startTime = 0, refusedVyshibala = false, hitAnim = 0;
-
-const rest = { x: 80, y: 60, w: 850, h: 600 };
-const player = { x: 400, y: 300, r: 20, speed: 6 };
-const keys = {};
+let isStarted = false, money = 50, playerName = "", totalLvl = 0;
+const rest = { x: 50, y: 100, w: 900, h: 550 };
+const player = { x: 450, y: 350, r: 18, speed: 6 };
 const joy = { active: false, dx: 0, dy: 0 };
 
 let items = {
-    kassa: { lvl: 0, cost: 0, x: 120, y: 350, w: 80, h: 80, name: "Касса", col: "#f1c40f" },
-    kuhnya: { lvl: 0, cost: 0, x: 120, y: 120, w: 120, h: 90, name: "Кухня", col: "#95a5a6" },
-    t1: { lvl: 0, cost: 0, x: 450, y: 150, w: 90, h: 90, name: "Стол 1", col: "#e67e22", busy: false },
-    t2: { lvl: 0, cost: 0, x: 750, y: 150, w: 90, h: 90, name: "Стол 2", col: "#e67e22", busy: false },
-    t3: { lvl: 0, cost: 0, x: 450, y: 450, w: 90, h: 90, name: "Стол 3", col: "#e67e22", busy: false },
-    t4: { lvl: 0, cost: 0, x: 750, y: 450, w: 90, h: 90, name: "Стол 4", col: "#e67e22", busy: false }
+    kassa: { lvl: 0, cost: 30, x: 80, y: 350, w: 70, h: 70, name: "Касса", col: "#f1c40f" },
+    kuhnya: { lvl: 0, cost: 50, x: 80, y: 150, w: 100, h: 80, name: "Кухня", col: "#95a5a6" },
+    t1: { lvl: 0, cost: 40, x: 400, y: 180, w: 80, h: 80, name: "Стол 1", col: "#e67e22", busy: false },
+    t2: { lvl: 0, cost: 40, x: 700, y: 180, w: 80, h: 80, name: "Стол 2", col: "#e67e22", busy: false },
+    t3: { lvl: 0, cost: 40, x: 400, y: 450, w: 80, h: 80, name: "Стол 3", col: "#e67e22", busy: false },
+    t4: { lvl: 0, cost: 40, x: 700, y: 450, w: 80, h: 80, name: "Стол 4", col: "#e67e22", busy: false }
 };
 
 let clients = [];
 
-window.onkeydown = e => keys[e.code] = true;
-window.onkeyup = e => keys[e.code] = false;
-window.ontouchstart = e => {
-    if (!isStarted) return;
-    const t = e.touches[0];
-    if (t.clientX < window.innerWidth/2) {
-        joy.active = true;
-        document.getElementById('joy-base').style.display = 'block';
-        document.getElementById('joy-base').style.left = (t.clientX - 50) + 'px';
-        document.getElementById('joy-base').style.top = (t.clientY - 50) + 'px';
-    }
-};
-window.ontouchmove = e => {
-    if (!joy.active) return;
-    const t = e.touches[0];
-    const rect = document.getElementById('joy-base').getBoundingClientRect();
-    const cx = rect.left + 50, cy = rect.top + 50;
-    const angle = Math.atan2(t.clientY - cy, t.clientX - cx);
-    joy.dx = Math.cos(angle); joy.dy = Math.sin(angle);
-};
-window.ontouchend = () => { joy.active = false; document.getElementById('joy-base').style.display = 'none'; joy.dx=0; joy.dy=0; };
-
 function startGame() {
-    playerName = document.getElementById('pName').value.trim() || "Игрок";
+    playerName = document.getElementById('pName').value || "Игрок";
     document.getElementById('start-menu').style.display = 'none';
     isStarted = true;
     startTime = Date.now();
+    
+    // Цикл ресурсов (каждые 15 сек)
+    setInterval(() => {
+        if (!isStarted) return;
+        resTimer--;
+        document.getElementById('res-timer').innerText = resTimer + "s";
+        if (resTimer <= 0) {
+            resData.salad = Math.max(0, resData.salad - 1);
+            resData.cheese = Math.max(0, resData.cheese - 1);
+            resData.meat = Math.max(0, resData.meat - 1);
+            resTimer = 15;
+            updateResUI();
+        }
+    }, 1000);
+
+    // Доход и спавн
     setInterval(() => {
         if(isStarted) {
-            money += (1 + totalLvl);
-            document.getElementById('balance').innerText = Math.floor(money);
-            document.getElementById('income').innerText = (1 + totalLvl);
+            money += (1 + totalLvl * 0.5);
+            updateResUI();
             document.getElementById('timer-val').innerText = Math.floor((Date.now() - startTime)/1000);
         }
     }, 1000);
-    setInterval(() => spawnClient('normal'), 7000);
-    setInterval(() => spawnClient('vyshibala'), 13000);
-    setInterval(() => spawnClient('director'), 17000);
+
+    setInterval(() => {
+        // Спавним только если есть еда
+        if(isStarted && resData.salad > 0 && resData.cheese > 0 && resData.meat > 0) {
+            spawnClient();
+        }
+    }, 6000);
+
     loop();
 }
 
-function spawnClient(type) {
-    if (!isStarted || clients.length > 7) return;
-    let col = type === 'vyshibala' ? "#ff4757" : (type === 'director' ? "#a29bfe" : "#54a0ff");
-    clients.push({ x: -40, y: 380, state: 'walking', type: type, wait: 160, target: null, color: col });
+function spawnClient() {
+    clients.push({ x: -30, y: 380, state: 'walking', target: null, wait: 120 });
 }
-
-async function triggerEnd(reason) {
-    if(!isStarted) return;
-    isStarted = false;
-    const finalSecs = Math.floor((Date.now() - startTime)/1000);
-    document.getElementById('ending').style.display = 'flex';
-    document.getElementById('final-time').innerText = "РЕЗУЛЬТАТ: " + finalSecs + "с";
-    document.getElementById('end-title').innerText = reason === "win" ? "КОНЦОВКА: МАГНАТ" : (reason === "murderer" ? "КОНЦОВКА: УБИЙЦА" : "КОНЦОВКА: БАБАХ!");
-    await saveGlobalRun(finalSecs);
-}
-
-function replyV(pay) { document.getElementById('dialog-v').style.display = 'none'; if(pay) money = Math.max(0, money-10); else refusedVyshibala = true; }
-function collectBonus() { money += 25; document.getElementById('dialog-d').style.display = 'none'; }
-
-document.getElementById('btn-hit').onclick = () => {
-    if(!hasBat) return;
-    hitAnim = 12;
-    let target = clients.find(c => Math.hypot(c.x - player.x, c.y - player.y) < 80);
-    if(target) {
-        clients = clients.filter(cl => cl !== target);
-        if(target.target) target.target.busy = false;
-        kills++;
-        if(kills >= 5) triggerEnd("murderer");
-    }
-};
 
 function loop() { if(!isStarted) return; update(); draw(); requestAnimationFrame(loop); }
 
 function update() {
     canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-    let vx = joy.active ? joy.dx * player.speed : 0;
-    let vy = joy.active ? joy.dy * player.speed : 0;
-    if(!joy.active) {
-        if(keys['KeyW'] || keys['ArrowUp']) vy = -player.speed;
-        if(keys['KeyS'] || keys['ArrowDown']) vy = player.speed;
-        if(keys['KeyA'] || keys['ArrowLeft']) vx = -player.speed;
-        if(keys['KeyD'] || keys['ArrowRight']) vx = player.speed;
-    }
-    if (player.x + vx > rest.x + 20 && player.x + vx < rest.x + rest.w - 20) player.x += vx;
-    if (player.y + vy > rest.y + 20 && player.y + vy < rest.y + rest.h - 20) player.y += vy;
-    if(!hasBat && player.x > rest.x + rest.w - 70 && player.y > rest.y + rest.h - 70) {
-        hasBat = true; document.getElementById('btn-hit').style.display = 'flex';
-    }
+    // Управление (упрощено)
+    if(joy.active) { player.x += joy.dx*player.speed; player.y += joy.dy*player.speed; }
+    
     clients.forEach(c => {
         if (c.state === 'walking') {
-            c.x += 1.3;
-            let table = Object.values(items).find(t => t.name.includes("Стол") && t.lvl > 0 && !t.busy);
-            if(table) { table.busy = true; c.target = table; c.state = 'toTable'; }
+            c.x += 1.5;
+            let t = Object.values(items).find(i => i.name.includes("Стол") && i.lvl > 0 && !i.busy);
+            if(t) { t.busy = true; c.target = t; c.state = 'toTable'; }
         } else if (c.state === 'toTable') {
-            c.x += (c.target.x - c.x)*0.03; c.y += (c.target.y - c.y)*0.03;
-            if(Math.hypot(c.x-c.target.x, c.y-c.target.y) < 5) {
-                c.state = 'eating';
-                if(c.type === 'vyshibala') document.getElementById('dialog-v').style.display = 'block';
-                if(c.type === 'director') document.getElementById('dialog-d').style.display = 'block';
-            }
+            c.x += (c.target.x - c.x)*0.05; c.y += (c.target.y - c.y)*0.05;
+            if(Math.hypot(c.x-c.target.x, c.y-c.target.y)<5) c.state = 'eating';
         } else if (c.state === 'eating') {
-            c.wait--; if(c.wait <= 0) { if(c.target) c.target.busy = false; c.state = 'toKassa'; }
-        } else if (c.state === 'toKassa') {
-            c.x += (items.kassa.x - c.x)*0.04; c.y += (items.kassa.y - c.y)*0.04;
-            if(Math.hypot(c.x - items.kassa.x, c.y - items.kassa.y) < 10) { money += 5; c.state = 'leaving'; }
-        } else if (c.state === 'leaving') { c.x -= 2.5; if(c.x < -100) clients = clients.filter(cl => cl !== c); }
+            c.wait--; if(c.wait<=0) { c.target.busy = false; c.state = 'leaving'; money += 10; }
+        } else if (c.state === 'leaving') { c.x -= 3; }
     });
-    if(Object.values(items).every(i => i.lvl >= 5)) triggerEnd(refusedVyshibala ? "vyshibala_boom" : "win");
+
+    if(Object.values(items).every(i => i.lvl >= 20)) win();
+}
+
+async function win() {
+    isStarted = false;
+    let time = Math.floor((Date.now()-startTime)/1000);
+    document.getElementById('ending').style.display = 'flex';
+    document.getElementById('final-time').innerText = time + " секунд";
+    await saveGlobalRun(time);
 }
 
 function draw() {
-    ctx.fillStyle = "#111"; ctx.fillRect(0,0, canvas.width, canvas.height);
-    ctx.fillStyle = "#4d3319"; ctx.fillRect(rest.x, rest.y, rest.w, rest.h);
+    ctx.fillStyle = "#111"; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = "#3d2b1f"; ctx.fillRect(rest.x, rest.y, rest.w, rest.h);
+    
     for(let k in items) {
         let it = items[k];
-        ctx.fillStyle = it.lvl > 0 ? it.col : "#333";
+        ctx.fillStyle = it.lvl > 0 ? it.col : "#222";
         ctx.fillRect(it.x, it.y, it.w, it.h);
-        ctx.fillStyle = "white"; ctx.font = "bold 14px Arial";
-        ctx.fillText(it.name + " ("+it.lvl+")", it.x, it.y - 10);
-        if(it.lvl < 5) {
-            ctx.fillStyle = money >= it.cost ? "#2ed573" : "#ff4757";
-            ctx.fillText("$" + it.cost, it.x, it.y + it.h + 20);
-        }
+        ctx.fillStyle = "#fff";
+        ctx.fillText(`${it.name} [${it.lvl}/20]`, it.x, it.y - 10);
+        if(it.lvl < 20) ctx.fillText(`$${it.cost}`, it.x, it.y + it.h + 20);
     }
-    if(!hasBat) { ctx.fillStyle = "#f1c40f"; ctx.fillRect(rest.x+rest.w-45, rest.y+rest.h-45, 12, 35); }
-    clients.forEach(c => { ctx.fillStyle = c.color; ctx.beginPath(); ctx.arc(c.x, c.y, 18, 0, Math.PI*2); ctx.fill(); });
-    ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(player.x, player.y, player.r, 0, Math.PI*2); ctx.fill();
-    if(hasBat) {
-        ctx.save(); ctx.translate(player.x, player.y); ctx.rotate(hitAnim > 0 ? 1 : -0.4);
-        ctx.fillStyle = "#f1c40f"; ctx.fillRect(15, -20, 8, 38);
-        ctx.restore(); if(hitAnim > 0) hitAnim--;
-    }
+    
+    clients.forEach(c => { ctx.fillStyle = "#54a0ff"; ctx.beginPath(); ctx.arc(c.x,c.y,15,0,Math.PI*2); ctx.fill(); });
+    ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(player.x,player.y,player.r,0,Math.PI*2); ctx.fill();
 }
 
-canvas.onmousedown = e => {
+canvas.onclick = e => {
     for(let k in items) {
         let it = items[k];
         if(e.clientX > it.x && e.clientX < it.x + it.w && e.clientY > it.y && e.clientY < it.y + it.h + 30) {
-            if(money >= it.cost && it.lvl < 5) {
+            if(money >= it.cost && it.lvl < 20) {
                 money -= it.cost; it.lvl++; totalLvl++;
-                it.cost = it.lvl === 1 ? 50 : Math.floor(it.cost * 1.4);
+                it.cost = Math.floor(it.cost * 1.3);
+                updateResUI();
             }
         }
     }
 };
+
+loadGlobalLeaderboard();
 </script>
 </body>
 </html>
