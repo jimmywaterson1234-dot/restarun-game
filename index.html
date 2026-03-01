@@ -3,49 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Resto Tycoon Ultra</title>
+    <title>Resto Tycoon Mega Mix</title>
     <style>
-        body { margin: 0; background: #111; overflow: hidden; font-family: 'Segoe UI', sans-serif; color: white; touch-action: none; }
+        body { margin: 0; background: #111; overflow: hidden; font-family: sans-serif; color: white; touch-action: none; }
         canvas { display: block; }
         .ui { position: fixed; inset: 0; pointer-events: none; z-index: 100; }
+        #hud { position: fixed; top: 10px; left: 10px; font-size: 20px; color: #f1c40f; text-shadow: 2px 2px #000; }
         
-        #res-bar { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); padding: 10px; border-radius: 10px; pointer-events: auto; display: flex; gap: 15px; border: 2px solid #f1c40f; }
-        .res-item { text-align: center; min-width: 70px; }
-        .res-val { font-weight: bold; font-size: 20px; display: block; color: #2ecc71; }
-        .buy-btn { background: #f1c40f; color: #000; border: none; border-radius: 5px; padding: 5px; cursor: pointer; font-size: 11px; font-weight: bold; width: 100%; margin-top: 5px; }
+        #res-box { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); padding: 10px; border-radius: 10px; pointer-events: auto; display: flex; gap: 10px; border: 2px solid #444; }
+        .res-col { text-align: center; font-size: 11px; }
+        .res-num { font-size: 16px; font-weight: bold; display: block; color: #2ecc71; }
+        .buy-btn { background: #f1c40f; border: none; padding: 4px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; }
         
-        #hud { position: fixed; top: 15px; left: 15px; font-size: 24px; color: #f1c40f; text-shadow: 2px 2px #000; }
-        #timer-ui { position: fixed; top: 15px; right: 15px; font-size: 20px; }
-        #res-timer-display { position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%); color: #ff4757; font-weight: bold; width: 200px; text-align: center; }
+        #timer-box { position: fixed; top: 85px; left: 50%; transform: translateX(-50%); color: #ff4757; font-weight: bold; font-size: 14px; }
+        #timer-game { position: fixed; top: 10px; right: 10px; font-size: 18px; }
 
-        .menu { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 3000; flex-direction: column; }
-        #leader-list { background: rgba(255,255,255,0.1); padding: 10px; border-radius: 10px; width: 250px; margin-top: 10px; }
+        .menu { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 3000; }
+        .leaderboard { background: rgba(255,255,255,0.1); padding: 10px; border-radius: 10px; width: 250px; margin-top: 10px; font-size: 14px; }
+        .leader-item { display: flex; justify-content: space-between; border-bottom: 1px solid #444; padding: 3px; }
+
+        .dialog { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #222; border: 3px solid #f1c40f; padding: 20px; display: none; pointer-events: auto; text-align: center; border-radius: 10px; z-index: 2000; }
+        .d-btn { padding: 10px 20px; margin: 5px; cursor: pointer; border: none; background: #27ae60; color: white; font-weight: bold; border-radius: 5px; }
         
-        /* Кнопки для телефона */
-        #mobile-controls { position: fixed; bottom: 30px; right: 30px; display: none; pointer-events: auto; }
-        .move-btn { width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 10px; margin: 5px; display: inline-flex; align-items: center; justify-content: center; font-size: 30px; }
+        #btn-hit { position: fixed; bottom: 30px; right: 30px; width: 80px; height: 80px; background: #c0392b; border-radius: 50%; display: none; align-items: center; justify-content: center; pointer-events: auto; border: 3px solid #fff; font-weight: bold; }
+        .end-screen { position: fixed; inset: 0; background: white; display: none; align-items: center; justify-content: center; z-index: 5000; color: #000; flex-direction: column; }
     </style>
 </head>
 <body>
 
 <div id="start-menu" class="menu">
-    <h1 style="color:#f1c40f">RESTO TYCOON ULTRA</h1>
-    <input type="text" id="pName" placeholder="Твой ник" style="padding:12px; width:200px; margin-bottom:15px; border-radius:8px;">
-    <button onclick="startGame()" style="padding:15px 50px; background:#2ecc71; color:white; border:none; border-radius:10px; font-size:20px; cursor:pointer;">ИГРАТЬ</button>
-    <div id="leader-list">Загрузка рекордов...</div>
+    <h1 style="color:#f1c40f">RESTO TYCOON MEGA</h1>
+    <input type="text" id="pName" placeholder="Твой ник" style="padding:10px; margin-bottom:10px;">
+    <button onclick="startGame()" style="padding:15px 40px; background:#27ae60; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">ИГРАТЬ</button>
+    <div class="leaderboard">
+        <h3 style="margin:0; text-align:center;">🏆 ТОП-5</h3>
+        <div id="leader-list">Загрузка...</div>
+    </div>
+</div>
+
+<div id="dialog-v" class="dialog">
+    <h3>ВЫШИБАЛА</h3><p>Плати $10 или ресторан БУМ!</p>
+    <button class="d-btn" onclick="replyV(true)">ПЛАТИТЬ</button>
+    <button class="d-btn" style="background:#c0392b" onclick="replyV(false)">НЕТ</button>
+</div>
+
+<div id="dialog-d" class="dialog">
+    <h3>АНДРЮША</h3><p>Твой сервис супер! Держи $25.</p>
+    <button class="d-btn" onclick="collectBonus()">ВЗЯТЬ</button>
+</div>
+
+<div id="ending" class="end-screen">
+    <h1 id="end-title"></h1><h2 id="final-time"></h2>
+    <button onclick="location.reload()" style="padding:10px 20px; cursor:pointer;">В МЕНЮ</button>
 </div>
 
 <div class="ui">
-    <div id="hud">$ <span id="balance">50</span></div>
-    
-    <div id="res-bar">
-        <div class="res-item">🥗 <span id="val-salad" class="res-val">10</span><button class="buy-btn" onclick="buyRes('salad')">КУПИТЬ $10</button></div>
-        <div class="res-item">🧀 <span id="val-cheese" class="res-val">10</span><button class="buy-btn" onclick="buyRes('cheese')">КУПИТЬ $12</button></div>
-        <div class="res-item">🥩 <span id="val-meat" class="res-val">10</span><button class="buy-btn" onclick="buyRes('meat')">КУПИТЬ $15</button></div>
-        <div id="res-timer-display">ДО РАСХОДА: <span id="res-sec">10</span>с</div>
+    <div id="hud">$ <span id="balance">100</span></div>
+    <div id="res-box">
+        <div class="res-col">🥗 Салат<span id="val-salad" class="res-num">10</span><button class="buy-btn" onclick="buyRes('salad')">$10</button></div>
+        <div class="res-col">🧀 Сыр<span id="val-cheese" class="res-num">10</span><button class="buy-btn" onclick="buyRes('cheese')">$12</button></div>
+        <div class="res-col">🥩 Мясо<span id="val-meat" class="res-num">10</span><button class="buy-btn" onclick="buyRes('meat')">$15</button></div>
     </div>
-
-    <div id="timer-ui">⏱ <span id="timer-val">0</span>с</div>
+    <div id="timer-box">РАСХОД: <span id="sec">10</span>с</div>
+    <div id="timer-game">⏱ <span id="timer-val">0</span>с</div>
+    <div id="btn-hit">УДАР!</div>
 </div>
 
 <canvas id="game"></canvas>
@@ -54,170 +75,194 @@
 const MY_ID = '3cd0e84787ad89d5aa8f'; 
 const URL = `https://api.npoint.io/${MY_ID}`;
 
-let money = 100, isStarted = false, playerName = "", startTime = 0;
-let resData = { salad: 10, cheese: 10, meat: 10 };
-let resTicks = 10;
-
-// Управление (ПК и Телефон)
-const keys = {};
-window.onkeydown = e => keys[e.code] = true;
-window.onkeyup = e => keys[e.code] = false;
-
-const player = { x: 450, y: 350, r: 18, speed: 5 };
-const items = {
-    kassa: { lvl: 1, cost: 50, x: 80, y: 300, w: 60, h: 60, name: "Касса", col: "#f1c40f" },
-    kuhnya: { lvl: 1, cost: 80, x: 80, y: 150, w: 90, h: 70, name: "Кухня", col: "#95a5a6" },
-    t1: { lvl: 0, cost: 40, x: 400, y: 180, w: 70, h: 70, name: "Стол 1", col: "#e67e22", state: 'free' },
-    t2: { lvl: 0, cost: 40, x: 650, y: 180, w: 70, h: 70, name: "Стол 2", col: "#e67e22", state: 'free' },
-    t3: { lvl: 0, cost: 40, x: 400, y: 400, w: 70, h: 70, name: "Стол 3", col: "#e67e22", state: 'free' },
-    t4: { lvl: 0, cost: 40, x: 650, y: 400, w: 70, h: 70, name: "Стол 4", col: "#e67e22", state: 'free' }
-};
-
-let clients = [];
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 
+let money = 100, isStarted = false, playerName = "", startTime = 0;
+let res = { salad: 10, cheese: 10, meat: 10 };
+let resTicks = 10, kills = 0, hasBat = false, hitAnim = 0;
+let refusedV = false;
+const keys = {};
+
+const player = { x: 400, y: 350, r: 15, speed: 5 };
+const items = {
+    kassa: { lvl: 1, cost: 50, x: 80, y: 300, w: 60, h: 60, name: "Касса", col: "#f1c40f" },
+    t1: { lvl: 0, cost: 40, x: 350, y: 200, w: 80, h: 80, name: "Стол 1", col: "#e67e22", status: 'free' },
+    t2: { lvl: 0, cost: 40, x: 600, y: 200, w: 80, h: 80, name: "Стол 2", col: "#e67e22", status: 'free' },
+    t3: { lvl: 0, cost: 40, x: 350, y: 450, w: 80, h: 80, name: "Стол 3", col: "#e67e22", status: 'free' }
+};
+let clients = [];
+
+// Управление
+window.onkeydown = e => keys[e.code] = true;
+window.onkeyup = e => keys[e.code] = false;
+let touchX = null, touchY = null;
+window.ontouchstart = e => { touchX = e.touches[0].clientX; touchY = e.touches[0].clientY; };
+window.ontouchmove = e => { touchX = e.touches[0].clientX; touchY = e.touches[0].clientY; };
+window.ontouchend = () => { touchX = null; touchY = null; };
+
+// Функции рекордов
+async function loadLeaderboard() {
+    try {
+        const r = await fetch(URL + "?n=" + Math.random());
+        const d = await r.json();
+        if(Array.isArray(d)) {
+            d.sort((a,b) => a.time - b.time);
+            document.getElementById('leader-list').innerHTML = d.slice(0,5).map((r,i) => `<div class="leader-item"><span>${i+1}. ${r.name}</span><b>${r.time}s</b></div>`).join('');
+        }
+    } catch(e) { document.getElementById('leader-list').innerText = "Рекордов нет"; }
+}
+
+async function saveRecord(sec) {
+    try {
+        const r = await fetch(URL + "?n=" + Math.random());
+        let d = await r.json(); if(!Array.isArray(d)) d = [];
+        d.push({name: playerName, time: sec});
+        d.sort((a,b) => a.time - b.time);
+        await fetch(URL, { method: 'POST', body: JSON.stringify(d.slice(0,10)) });
+    } catch(e) {}
+}
+
 function buyRes(type) {
     let p = { salad: 10, cheese: 12, meat: 15 };
-    if(money >= p[type]) { money -= p[type]; resData[type] += 10; updateUI(); }
+    if(money >= p[type]) { money -= p[type]; res[type] += 10; updateUI(); }
 }
 
 function updateUI() {
     document.getElementById('balance').innerText = Math.floor(money);
-    document.getElementById('val-salad').innerText = resData.salad;
-    document.getElementById('val-cheese').innerText = resData.cheese;
-    document.getElementById('val-meat').innerText = resData.meat;
+    document.getElementById('val-salad').innerText = res.salad;
+    document.getElementById('val-cheese').innerText = res.cheese;
+    document.getElementById('val-meat').innerText = res.meat;
 }
 
 function startGame() {
     playerName = document.getElementById('pName').value || "Игрок";
     document.getElementById('start-menu').style.display = 'none';
-    isStarted = true;
-    startTime = Date.now();
+    isStarted = true; startTime = Date.now();
     
-    // Таймер расхода еды (каждую секунду -1, каждые 10 сек сброс)
     setInterval(() => {
         if(!isStarted) return;
         resTicks--;
-        // Каждую секунду тратим
-        resData.salad = Math.max(0, resData.salad - 1);
-        resData.cheese = Math.max(0, resData.cheese - 1);
-        resData.meat = Math.max(0, resData.meat - 1);
-        
+        res.salad = Math.max(0, res.salad - 1);
+        res.cheese = Math.max(0, res.cheese - 1);
+        res.meat = Math.max(0, res.meat - 1);
         if(resTicks <= 0) resTicks = 10;
-        document.getElementById('res-sec').innerText = resTicks;
+        document.getElementById('sec').innerText = resTicks;
+        document.getElementById('timer-val').innerText = Math.floor((Date.now()-startTime)/1000);
         updateUI();
     }, 1000);
 
-    // Доход
-    setInterval(() => { if(isStarted) money += 1; }, 2000);
-
-    // Спавн клиентов (только если есть еда и столы)
     setInterval(() => {
-        let freeTable = Object.values(items).find(i => i.name.includes("Стол") && i.lvl > 0 && i.state === 'free');
-        let hasFood = resData.salad > 0 && resData.cheese > 0 && resData.meat > 0;
-        if(isStarted && freeTable && hasFood) {
-            clients.push({ x: -20, y: 330, state: 'toTable', target: freeTable });
-            freeTable.state = 'busy';
+        let freeT = Object.values(items).find(i => i.name.includes("Стол") && i.lvl > 0 && i.status === 'free');
+        let hasFood = res.salad > 0 && res.cheese > 0 && res.meat > 0;
+        if(isStarted && freeT && hasFood) {
+            let rand = Math.random();
+            let type = rand < 0.1 ? 'vyshibala' : (rand < 0.2 ? 'director' : 'normal');
+            freeT.status = 'busy';
+            clients.push({ x: -20, y: 350, state: 'toTable', target: freeT, type: type, wait: 120 });
         }
     }, 5000);
 
     loop();
 }
 
-function loop() {
-    if(!isStarted) return;
-    update();
-    draw();
-    requestAnimationFrame(loop);
+function replyV(pay) { document.getElementById('dialog-v').style.display = 'none'; if(pay) money = Math.max(0, money-10); else refusedV = true; }
+function collectBonus() { money += 25; document.getElementById('dialog-d').style.display = 'none'; updateUI(); }
+
+document.getElementById('btn-hit').onclick = () => {
+    hitAnim = 10;
+    let target = clients.find(c => Math.hypot(c.x - player.x, c.y - player.y) < 60);
+    if(target) {
+        if(target.target) target.target.status = 'free';
+        clients = clients.filter(cl => cl !== target);
+        kills++; if(kills >= 5) end("murderer");
+    }
+};
+
+async function end(reason) {
+    if(!isStarted) return; isStarted = false;
+    const sec = Math.floor((Date.now()-startTime)/1000);
+    document.getElementById('ending').style.display = 'flex';
+    document.getElementById('final-time').innerText = "ВРЕМЯ: " + sec + "с";
+    if(reason === 'win') { document.getElementById('end-title').innerText = "КОНЦОВКА: МАГНАТ"; await saveRecord(sec); }
+    else if(reason === 'murderer') document.getElementById('end-title').innerText = "КОНЦОВКА: УБИЙЦА";
+    else document.getElementById('end-title').innerText = "КОНЦОВКА: БАБАХ!";
 }
 
 function update() {
     canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-
-    // Движение ПК (WASD / Стрелки)
-    if (keys['KeyW'] || keys['ArrowUp']) player.y -= player.speed;
-    if (keys['KeyS'] || keys['ArrowDown']) player.y += player.speed;
-    if (keys['KeyA'] || keys['ArrowLeft']) player.x -= player.speed;
-    if (keys['KeyD'] || keys['ArrowRight']) player.x += player.speed;
-
-    // Движение Телефон (Клик в сторону)
-    canvas.ontouchstart = e => {
-        let tx = e.touches[0].clientX; let ty = e.touches[0].clientY;
-        if(tx < player.x) player.x -= 10; else player.x += 10;
-        if(ty < player.y) player.y -= 10; else player.y += 10;
-    };
+    if(keys['KeyW'] || keys['ArrowUp']) player.y -= player.speed;
+    if(keys['KeyS'] || keys['ArrowDown']) player.y += player.speed;
+    if(keys['KeyA'] || keys['ArrowLeft']) player.x -= player.speed;
+    if(keys['KeyD'] || keys['ArrowRight']) player.x += player.speed;
+    if(touchX !== null) {
+        let dx = touchX - player.x, dy = touchY - player.y, d = Math.hypot(dx,dy);
+        if(d>5) { player.x += (dx/d)*player.speed; player.y += (dy/d)*player.speed; }
+    }
 
     clients.forEach((c, idx) => {
         if(c.state === 'toTable') {
             c.x += (c.target.x - c.x)*0.03; c.y += (c.target.y - c.y)*0.03;
-            if(Math.hypot(c.x-c.target.x, c.y-c.target.y)<5) {
+            if(Math.hypot(c.x - c.target.x, c.y - c.target.y) < 5) {
                 c.state = 'eating';
-                setTimeout(() => { 
-                    c.state = 'leaving'; 
-                    c.target.state = 'dirty'; // Новая фишка: стол грязный
-                    money += 25;
-                }, 4000);
+                if(c.type === 'vyshibala') document.getElementById('dialog-v').style.display = 'block';
+                if(c.type === 'director') document.getElementById('dialog-d').style.display = 'block';
             }
-        } else if(c.state === 'leaving') {
-            c.x -= 4;
-            if(c.x < -50) clients.splice(idx, 1);
-        }
+        } else if(c.state === 'eating') {
+            c.wait--; if(c.wait <= 0) { 
+                c.state = 'leaving'; c.target.status = 'dirty'; 
+                money += 30; updateUI(); 
+            }
+        } else if(c.state === 'leaving') { c.x -= 4; if(c.x < -40) clients.splice(idx, 1); }
     });
 
-    // Уборка столов (подойди вплотную)
     Object.values(items).forEach(it => {
-        if(it.state === 'dirty' && Math.hypot(player.x - (it.x+it.w/2), player.y - (it.y+it.h/2)) < 50) {
-            it.state = 'free';
-        }
+        if(it.status === 'dirty' && Math.hypot(player.x - (it.x+40), player.y - (it.y+40)) < 40) it.status = 'free';
     });
 
-    if(Object.values(items).every(i => i.lvl >= 20)) alert("ПОБЕДА!");
+    if(!hasBat && player.x > 850 && player.y > 550) { hasBat = true; document.getElementById('btn-hit').style.display = 'flex'; }
+    if(Object.values(items).every(i => i.lvl >= 20)) end(refusedV ? 'boom' : 'win');
 }
 
 function draw() {
-    ctx.fillStyle = "#111"; ctx.fillRect(0,0,canvas.width,canvas.height);
-    
-    // Отрисовка мебели
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = "#3d2b1f"; ctx.fillRect(50, 100, 850, 500); // Пол
+
     for(let k in items) {
         let it = items[k];
-        ctx.fillStyle = it.lvl === 0 ? "#222" : (it.state === 'dirty' ? "#4d3319" : it.col);
+        ctx.fillStyle = it.lvl === 0 ? "#222" : (it.status === 'dirty' ? "#4d3319" : it.col);
         ctx.fillRect(it.x, it.y, it.w, it.h);
-        ctx.fillStyle = "#fff"; ctx.font = "14px Arial";
-        ctx.fillText(`${it.name} [${it.lvl}/20]`, it.x, it.y - 10);
-        if(it.state === 'dirty') ctx.fillText("ГРЯЗНО! (Подойди)", it.x, it.y + it.h/2);
+        ctx.fillStyle = "white"; ctx.font = "12px Arial";
+        ctx.fillText(`${it.name} [${it.lvl}/20]`, it.x, it.y - 8);
+        if(it.lvl < 20) ctx.fillText(`$${it.cost}`, it.x, it.y + it.h + 15);
     }
 
-    // Клиенты
+    if(!hasBat) { ctx.fillStyle = "#f1c40f"; ctx.fillRect(870, 560, 10, 30); }
+
     clients.forEach(c => {
-        ctx.fillStyle = "#54a0ff"; ctx.beginPath(); ctx.arc(c.x, c.y, 15, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = c.type === 'vyshibala' ? "#ff4757" : (c.type === 'director' ? "#a29bfe" : "#54a0ff");
+        ctx.beginPath(); ctx.arc(c.x, c.y, 15, 0, Math.PI*2); ctx.fill();
     });
 
-    // Игрок
-    ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(player.x, player.y, player.r, 0, Math.PI*2); ctx.fill();
-    ctx.strokeStyle = "#f1c40f"; ctx.lineWidth = 3; ctx.stroke();
+    ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(player.x, player.y, player.r, 0, Math.PI*2); ctx.fill();
+    if(hasBat) {
+        ctx.save(); ctx.translate(player.x, player.y); ctx.rotate(hitAnim > 0 ? 1 : -0.4);
+        ctx.fillStyle = "#f1c40f"; ctx.fillRect(15, -20, 6, 30); ctx.restore();
+        if(hitAnim > 0) hitAnim--;
+    }
 }
 
 canvas.onclick = e => {
     Object.values(items).forEach(it => {
-        if(e.clientX > it.x && e.clientX < it.x+it.w && e.clientY > it.y && e.clientY < it.y+it.h+40) {
+        if(e.clientX > it.x && e.clientX < it.x + it.w && e.clientY > it.y && e.clientY < it.y + it.h + 30) {
             if(money >= it.cost && it.lvl < 20) {
-                money -= it.cost; it.lvl++; it.cost = Math.floor(it.cost * 1.4);
-                updateUI();
+                money -= it.cost; it.lvl++; it.cost = Math.floor(it.cost * 1.5); updateUI();
             }
         }
     });
 };
 
-async function loadLeaderboard() {
-    try {
-        const res = await fetch(URL + "?t=" + Date.now());
-        const data = await res.json();
-        if(Array.isArray(data)) {
-            document.getElementById('leader-list').innerHTML = data.slice(0,5).map((r,i) => `<div>${i+1}. ${r.name} - ${r.time}с</div>`).join('');
-        }
-    } catch(e) { document.getElementById('leader-list').innerHTML = "Будь первым!"; }
-}
+function loop() { if(!isStarted) return; update(); draw(); requestAnimationFrame(loop); }
 loadLeaderboard();
 </script>
 </body>
