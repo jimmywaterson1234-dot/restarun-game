@@ -3,69 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Resto Tycoon: Global Top 5</title>
+    <title>Resto Tycoon Classic Online</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    
     <style>
-        body { margin: 0; background: #111; overflow: hidden; font-family: 'Segoe UI', sans-serif; color: white; touch-action: none; }
+        body { margin: 0; background: #000; overflow: hidden; font-family: Arial, sans-serif; color: white; touch-action: none; }
         canvas { display: block; }
         .ui { position: fixed; inset: 0; pointer-events: none; z-index: 100; }
         
-        /* Главное меню */
-        #start-menu { position: fixed; inset: 0; background: radial-gradient(circle, #2c3e50 0%, #000 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
-        #play-btn { padding: 20px 80px; background: #27ae60; color: white; border: none; border-radius: 15px; font-size: 28px; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.5); margin-bottom: 30px; }
+        /* Меню как в оригинале */
+        #start-menu { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
+        #play-btn { padding: 15px 50px; background: #27ae60; color: white; border: none; font-size: 24px; font-weight: bold; cursor: pointer; margin-bottom: 20px; }
         
-        /* Таблица рекордов в меню */
-        #leaderboard-box { background: rgba(0,0,0,0.8); border: 2px solid #f1c40f; padding: 15px; border-radius: 15px; width: 280px; text-align: center; }
-        #leaderboard-box h3 { margin: 0 0 10px 0; color: #f1c40f; font-size: 18px; text-transform: uppercase; }
-        .score-row { display: flex; justify-content: space-between; padding: 5px 10px; border-bottom: 1px solid #333; font-size: 16px; }
-        .score-row:last-child { border: none; }
-        .score-name { color: #00d2ff; }
-        .score-val { color: #2ecc71; font-weight: bold; }
+        /* Таблица ТОП-5 */
+        #leaderboard { background: #111; border: 1px solid #444; padding: 10px; width: 250px; text-align: center; font-size: 14px; }
+        .score-item { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid #222; }
 
-        /* Игровой интерфейс */
-        #hud { position: fixed; top: 15px; left: 15px; font-size: 26px; color: #f1c40f; font-weight: bold; }
-        #res-box { position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.8); padding: 12px; border-radius: 15px; pointer-events: auto; display: flex; flex-direction: column; gap: 8px; border: 2px solid #444; }
-        .res-row { display: flex; align-items: center; justify-content: space-between; gap: 15px; font-size: 16px; }
-        .buy-btn { background: #f1c40f; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; }
+        /* Игровой HUD */
+        #hud { position: fixed; top: 10px; left: 10px; font-size: 22px; color: #f1c40f; }
+        #res-box { position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.8); padding: 10px; pointer-events: auto; border: 1px solid #555; }
+        .res-row { margin-bottom: 5px; font-size: 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .buy-btn { background: #f1c40f; border: none; padding: 5px 10px; font-weight: bold; cursor: pointer; }
 
-        #joy-base { position: fixed; bottom: 40px; left: 40px; width: 110px; height: 110px; background: rgba(255,255,255,0.1); border-radius: 50%; border: 2px solid rgba(255,255,255,0.2); pointer-events: auto; }
-        #joy-stick { position: absolute; top: 30px; left: 30px; width: 50px; height: 50px; background: rgba(255,255,255,0.4); border-radius: 50%; }
-        #hit-btn { position: fixed; bottom: 45px; right: 45px; width: 90px; height: 90px; background: #e74c3c; border-radius: 50%; display: none; align-items: center; justify-content: center; pointer-events: auto; border: 4px solid white; font-weight: bold; }
-        
-        .popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #222; border: 4px solid #f1c40f; padding: 25px; display: none; pointer-events: auto; text-align: center; border-radius: 20px; z-index: 500; }
+        /* Управление для телефона */
+        #joy-base { position: fixed; bottom: 40px; left: 40px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; pointer-events: auto; }
+        #joy-stick { position: absolute; top: 25px; left: 25px; width: 50px; height: 50px; background: rgba(255,255,255,0.3); border-radius: 50%; }
+        #hit-btn { position: fixed; bottom: 40px; right: 40px; width: 80px; height: 80px; background: #e74c3c; border-radius: 50%; display: none; align-items: center; justify-content: center; pointer-events: auto; font-weight: bold; border: 2px solid #fff; }
+
+        .popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #222; border: 2px solid #f1c40f; padding: 20px; display: none; pointer-events: auto; text-align: center; z-index: 500; }
     </style>
 </head>
 <body>
 
 <div id="start-menu">
-    <h1 style="color:#f1c40f; font-size: 45px; margin-bottom: 5px;">ULTRA RESTO</h1>
-    <p style="color:#aaa; margin-bottom: 25px;">СТАТЬ ЛУЧШИМ ПОВАРОМ МИРА</p>
-    
+    <h1 style="color:#f1c40f">RESTO TYCOON</h1>
     <button id="play-btn" onclick="startGame()">ИГРАТЬ</button>
-
-    <div id="leaderboard-box">
-        <h3>🏆 ТОП-5 МИРА</h3>
-        <div id="leaderboard-list">
-            <div class="score-row">Загрузка...</div>
-        </div>
+    <div id="leaderboard">
+        <div style="color:#00d2ff; margin-bottom:5px;">🏆 МИРОВОЙ ТОП-5</div>
+        <div id="top-list">Загрузка...</div>
     </div>
 </div>
 
 <div id="pop-v" class="popup">
-    <h2 style="color:#e74c3c">ВЫШИБАЛА!</h2>
-    <p>Отдай $20 или ресторан взлетит на воздух!</p>
-    <button onclick="payV(true)" style="background:#2ecc71; color:white; padding:12px 25px; border:none; border-radius:10px; font-weight:bold;">ПЛАТИТЬ</button>
-    <button onclick="payV(false)" style="background:#e74c3c; color:white; padding:12px 25px; border:none; border-radius:10px; font-weight:bold; margin-left:10px;">НЕТ</button>
+    <h2 style="color:red">ВЫШИБАЛА!</h2>
+    <p>Плати $20 или всё взорву!</p>
+    <button onclick="payV(true)" style="background:green; color:white; padding:10px;">ПЛАТИТЬ</button>
+    <button onclick="payV(false)" style="background:red; color:white; padding:10px;">ОТКАЗАТЬ</button>
 </div>
 
 <div class="ui">
     <div id="hud">$ <span id="balance">150</span></div>
     <div id="res-box">
-        <div class="res-row">🥗 <span id="val-s">15</span> <button class="buy-btn" onclick="buy('s')">+$5</button></div>
-        <div class="res-row">🧀 <span id="val-c">15</span> <button class="buy-btn" onclick="buy('c')">+$7</button></div>
-        <div class="res-row">🥩 <span id="val-m">15</span> <button class="buy-btn" onclick="buy('m')">+$10</button></div>
+        <div class="res-row">🥗 <span id="v-s">15</span> <button class="buy-btn" onclick="buy('s')">$5</button></div>
+        <div class="res-row">🧀 <span id="v-c">15</span> <button class="buy-btn" onclick="buy('c')">$7</button></div>
+        <div class="res-row">🥩 <span id="v-m">15</span> <button class="buy-btn" onclick="buy('m')">$10</button></div>
     </div>
     <div id="joy-base"><div id="joy-stick"></div></div>
     <div id="hit-btn" onclick="hit()">УДАР!</div>
@@ -74,95 +65,88 @@
 <canvas id="game"></canvas>
 
 <script>
-// --- ВАЖНО: Вставь сюда свои данные Firebase ---
+// --- КОНФИГ FIREBASE (Вставь свои данные) ---
 const firebaseConfig = {
     apiKey: "ТВОЙ_API_KEY",
-    databaseURL: "ТВОЯ_DATABASE_URL"
+    databaseURL: "ТВОЯ_ССЫЛКА"
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// --- ЛОГИКА ТАБЛИЦЫ РЕКОРДОВ ---
 function loadTop5() {
-    const list = document.getElementById('leaderboard-list');
-    db.ref('records').orderByValue().limitToLast(5).on('value', (snap) => {
+    db.ref('records').orderByValue().limitToLast(5).on('value', (s) => {
+        const list = document.getElementById('top-list');
         list.innerHTML = "";
-        let data = [];
-        snap.forEach(child => { data.push({name: child.key, score: child.val()}); });
-        data.reverse().forEach((player, index) => {
-            list.innerHTML += `
-                <div class="score-row">
-                    <span>${index+1}. <span class="score-name">${player.name}</span></span>
-                    <span class="score-val">$${player.score}</span>
-                </div>`;
+        let arr = [];
+        s.forEach(c => { arr.push({n: c.key, s: c.val()}); });
+        arr.reverse().forEach((p, i) => {
+            list.innerHTML += `<div class="score-item"><span>${i+1}. ${p.n}</span><b>$${p.s}</b></div>`;
         });
     });
 }
-
-function saveFinalRecord() {
-    let name = prompt("Игра окончена! Введи имя для рекорда:", "Игрок");
-    if(!name) name = "Аноним";
-    db.ref('records/' + name).set(Math.floor(money));
-}
-
-// Загружаем топ сразу при открытии
 loadTop5();
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
-let money = 150, isStarted = false, res = {s:15, c:15, m:15};
+let money = 150, res = {s:15, c:15, m:15}, isStarted = false;
 let hasBat = false, hitAnim = 0, kills = 0;
 
-const room = { x: 50, y: 100, w: 850, h: 550 };
-const player = { x: 450, y: 350, r: 20, speed: 6.5 };
+const room = { x: 50, y: 80, w: 800, h: 500 };
+const player = { x: 400, y: 300, r: 18, speed: 5 };
 const items = {
-    kassa: { lvl: 1, cost: 50, x: 100, y: 350, w: 80, h: 80, name: "Касса", col: "#f1c40f" },
-    t1: { lvl: 0, cost: 40, x: 350, y: 220, w: 100, h: 100, name: "Стол 1", col: "#e67e22", status: 'free' },
-    t2: { lvl: 0, cost: 40, x: 650, y: 220, w: 100, h: 100, name: "Стол 2", col: "#e67e22", status: 'free' },
-    t3: { lvl: 0, cost: 40, x: 350, y: 500, w: 100, h: 100, name: "Стол 3", col: "#e67e22", status: 'free' }
+    kassa: { lvl: 1, cost: 50, x: 80, y: 300, w: 60, h: 60, name: "Касса", col: "#f1c40f" },
+    t1: { lvl: 0, cost: 40, x: 300, y: 150, w: 80, h: 80, name: "Стол 1", col: "#e67e22", status: 'free' },
+    t2: { lvl: 0, cost: 40, x: 550, y: 150, w: 80, h: 80, name: "Стол 2", col: "#e67e22", status: 'free' },
+    t3: { lvl: 0, cost: 40, x: 300, y: 400, w: 80, h: 80, name: "Стол 3", col: "#e67e22", status: 'free' }
 };
-let clients = [];
-let NPCs = [{ x: 800, y: 180, type: 'andryusha', name: "Андрюша", timer: 0 }];
+let clients = [], NPCs = [{ x: 750, y: 130, type: 'andryusha', name: "Андрюша", timer: 0 }];
 
-// Джойстик
+// Управление
 let joy = { x: 0, y: 0, active: false };
 const jBase = document.getElementById('joy-base'), jStick = document.getElementById('joy-stick');
 jBase.addEventListener('touchstart', () => joy.active = true);
 window.addEventListener('touchmove', (e) => {
     if(!joy.active) return;
-    let r = jBase.getBoundingClientRect(), cx = r.left + r.width/2, cy = r.top + r.height/2;
-    let dx = e.touches[0].clientX - cx, dy = e.touches[0].clientY - cy;
+    let r = jBase.getBoundingClientRect(), cx = r.left+50, cy = r.top+50;
+    let dx = e.touches[0].clientX-cx, dy = e.touches[0].clientY-cy;
     let d = Math.min(Math.hypot(dx,dy), 50), a = Math.atan2(dy,dx);
     joy.x = Math.cos(a)*(d/50); joy.y = Math.sin(a)*(d/50);
-    jStick.style.transform = `translate(${joy.x*35}px, ${joy.y*35}px)`;
+    jStick.style.transform = `translate(${joy.x*30}px, ${joy.y*30}px)`;
 });
 window.addEventListener('touchend', () => { joy.active = false; joy.x = 0; joy.y = 0; jStick.style.transform = 'none'; });
 
 function buy(t) { 
     let p = {s:5, c:7, m:10}; 
-    if(money >= p[t]) { money -= p[t]; res[t]+=25; updateUI(); } 
+    if(money >= p[t]) { money -= p[t]; res[t]+=20; updateUI(); } 
 }
 
 function updateUI() {
     document.getElementById('balance').innerText = Math.floor(money);
-    document.getElementById('val-s').innerText = Math.floor(res.s);
-    document.getElementById('val-c').innerText = Math.floor(res.c);
-    document.getElementById('val-m').innerText = Math.floor(res.m);
+    document.getElementById('v-s').innerText = Math.floor(res.s);
+    document.getElementById('v-c').innerText = Math.floor(res.c);
+    document.getElementById('v-m').innerText = Math.floor(res.m);
 }
 
 function payV(ok) {
     document.getElementById('pop-v').style.display = 'none';
-    if(!ok) { saveFinalRecord(); location.reload(); }
-    else { money = Math.max(0, money-20); updateUI(); }
+    if(!ok) { 
+        let name = prompt("РЕСТОРАН ВЗОРВАН! Твой рекорд:", "Игрок");
+        if(name) db.ref('records/'+name).set(Math.floor(money));
+        location.reload(); 
+    } else { money = Math.max(0, money-20); updateUI(); }
 }
 
 function hit() {
     hitAnim = 15;
-    let target = clients.find(c => Math.hypot(c.x-player.x, c.y-player.y) < 75);
+    let target = clients.find(c => Math.hypot(c.x-player.x, c.y-player.y) < 60);
     if(target) {
         if(target.target) target.target.status = 'free';
         clients = clients.filter(cl => cl !== target);
-        kills++; if(kills >= 10) { saveFinalRecord(); location.reload(); }
+        kills++; if(kills >= 10) { 
+            let name = prompt("ТЫ АРЕСТОВАН! Твой рекорд:", "Игрок");
+            if(name) db.ref('records/'+name).set(Math.floor(money));
+            location.reload(); 
+        }
     }
 }
 
@@ -170,94 +154,92 @@ function startGame() {
     document.getElementById('start-menu').style.display = 'none';
     isStarted = true;
     updateUI();
-    
-    // Клиенты приходят только если есть еда
     setInterval(() => {
         let freeT = Object.values(items).find(i => i.lvl > 0 && i.status === 'free');
         if(isStarted && freeT && res.s>=1 && res.c>=1 && res.m>=1) {
             freeT.status = 'busy';
-            clients.push({ x: -40, y: 350, state: 'toTable', target: freeT, timer: 180, isV: Math.random()<0.15 });
+            clients.push({ x: -30, y: 300, state: 'toTable', target: freeT, timer: 150, isV: Math.random()<0.15 });
         }
-    }, 4500);
+    }, 5000);
     loop();
 }
 
 function update() {
     canvas.width = window.innerWidth; canvas.height = window.innerHeight;
     let nX = player.x + joy.x * player.speed, nY = player.y + joy.y * player.speed;
-    if(nX > room.x + 20 && nX < room.x + room.w - 20) player.x = nX;
-    if(nY > room.y + 20 && nY < room.y + room.h - 20) player.y = nY;
+    if(nX > room.x+20 && nX < room.x+room.w-20) player.x = nX;
+    if(nY > room.y+20 && nY < room.y+room.h-20) player.y = nY;
 
     NPCs.forEach(npc => {
-        if(npc.type === 'andryusha' && Math.hypot(player.x-npc.x, player.y-npc.y) < 45 && npc.timer <= 0) {
-            money += 25; npc.timer = 600; updateUI();
+        if(npc.type==='andryusha' && Math.hypot(player.x-npc.x, player.y-npc.y)<40 && npc.timer<=0) {
+            money+=25; npc.timer=600; updateUI();
         }
         if(npc.timer > 0) npc.timer--;
     });
 
     clients.forEach((c, idx) => {
-        if(c.state === 'toTable') {
-            c.x += (c.target.x - c.x)*0.04; c.y += (c.target.y - c.y)*0.04;
-            if(Math.hypot(c.x-c.target.x, c.y-c.target.y)<5) c.state = 'eating';
-        } else if(c.state === 'eating') {
+        if(c.state==='toTable') {
+            c.x+=(c.target.x-c.x)*0.04; c.y+=(c.target.y-c.y)*0.04;
+            if(Math.hypot(c.x-c.target.x, c.y-c.target.y)<5) c.state='eating';
+        } else if(c.state==='eating') {
             c.timer--; 
-            if(c.timer <= 0) { 
-                // Единица еды тратится тут
-                res.s -= 1; res.c -= 1; res.m -= 1;
-                c.state = 'toKassa'; c.target.status = 'free'; updateUI();
+            if(c.timer<=0) { 
+                // Еда тратится ТОЛЬКО когда клиент поел
+                res.s--; res.c--; res.m--;
+                c.state='toKassa'; c.target.status='free'; updateUI();
             }
-        } else if(c.state === 'toKassa') {
-            c.x += (items.kassa.x + 40 - c.x)*0.06; c.y += (items.kassa.y + 40 - c.y)*0.06;
-            if(Math.hypot(c.x-(items.kassa.x+40), c.y-(items.kassa.y+40))<5) {
-                money += 50; c.state = 'leaving';
-                if(c.isV) document.getElementById('pop-v').style.display = 'block';
+        } else if(c.state==='toKassa') {
+            c.x+=(items.kassa.x+30-c.x)*0.06; c.y+=(items.kassa.y+30-c.y)*0.06;
+            if(Math.hypot(c.x-(items.kassa.x+30), c.y-(items.kassa.y+30))<5) {
+                money+=50; c.state='leaving';
+                if(c.isV) document.getElementById('pop-v').style.display='block';
                 updateUI();
             }
-        } else { c.x -= 6; if(c.x < -60) clients.splice(idx,1); }
+        } else { c.x-=5; if(c.x<-50) clients.splice(idx,1); }
     });
 
-    if(!hasBat && player.x > room.x+room.w-80 && player.y > room.y+room.h-80) {
-        hasBat = true; document.getElementById('hit-btn').style.display = 'flex';
+    if(!hasBat && player.x > room.x+room.w-60 && player.y > room.y+room.h-60) {
+        hasBat = true; document.getElementById('hit-btn').style.display='flex';
     }
 }
 
 function draw() {
     ctx.clearRect(0,0,canvas.width, canvas.height);
-    ctx.fillStyle = "#2c3e50"; ctx.fillRect(room.x, room.y, room.w, room.h);
-    ctx.strokeStyle = "#444"; ctx.lineWidth = 12; ctx.strokeRect(room.x, room.y, room.w, room.h);
+    ctx.fillStyle="#1a1a1a"; ctx.fillRect(room.x, room.y, room.w, room.h);
+    ctx.strokeStyle="#333"; ctx.lineWidth=5; ctx.strokeRect(room.x, room.y, room.w, room.h);
 
     for(let k in items) {
         let it = items[k];
-        ctx.fillStyle = it.lvl === 0 ? "#1a1a1a" : it.col;
+        ctx.fillStyle = it.lvl===0 ? "#000" : it.col;
         ctx.fillRect(it.x, it.y, it.w, it.h);
-        ctx.fillStyle = "white"; ctx.font = "bold 15px Arial"; ctx.fillText(it.name, it.x, it.y - 12);
+        ctx.fillStyle="white"; ctx.font="12px Arial"; ctx.fillText(it.name, it.x, it.y-5);
     }
 
-    NPCs.forEach(npc => {
-        ctx.fillStyle = npc.timer > 0 ? "#555" : "#9b59b6";
-        ctx.beginPath(); ctx.arc(npc.x, npc.y, 22, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = "white"; ctx.fillText(npc.name, npc.x-30, npc.y-35);
+    NPCs.forEach(n => {
+        ctx.fillStyle=n.timer>0?"#333":"#9b59b6";
+        ctx.beginPath(); ctx.arc(n.x, n.y, 20, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle="white"; ctx.fillText(n.name, n.x-25, n.y-25);
     });
 
     clients.forEach(c => {
-        ctx.fillStyle = c.isV ? "#e74c3c" : "#3498db";
-        ctx.beginPath(); ctx.arc(c.x, c.y, 20, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle=c.isV?"#e74c3c":"#3498db";
+        ctx.beginPath(); ctx.arc(c.x, c.y, 18, 0, Math.PI*2); ctx.fill();
     });
 
-    ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(player.x, player.y, player.r, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = "black"; ctx.fillText(hitAnim > 0 ? ";)" : ":)", player.x-8, player.y+7);
+    ctx.fillStyle="white"; ctx.beginPath(); ctx.arc(player.x, player.y, player.r, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle="black"; ctx.fillText(hitAnim>0?";)":":)", player.x-8, player.y+5);
     
     if(hasBat) {
-        ctx.save(); ctx.translate(player.x, player.y); ctx.rotate(hitAnim > 0 ? 1.0 : -0.7);
-        ctx.fillStyle = "#f1c40f"; ctx.fillRect(20, -30, 9, 40); ctx.restore();
-        if(hitAnim > 0) hitAnim--;
+        ctx.save(); ctx.translate(player.x, player.y); ctx.rotate(hitAnim>0?1:-0.7);
+        ctx.fillStyle="#f1c40f"; ctx.fillRect(15, -25, 6, 30); ctx.restore();
+        if(hitAnim>0) hitAnim--;
     }
 }
 
 canvas.onclick = e => {
     Object.values(items).forEach(it => {
-        if(e.clientX > it.x && e.clientX < it.x+it.w && e.clientY > it.y && e.clientY < it.y+it.h+40) {
-            if(money >= it.cost && it.lvl < 20) { money -= it.cost; it.lvl++; it.cost = Math.floor(it.cost * 1.7); updateUI(); }
+        if(e.clientX > it.x && e.clientX < it.x+it.w && e.clientY > it.y && e.clientY < it.y+it.h+30) {
+            if(money>=it.cost && it.lvl<20) { money-=it.cost; it.lvl++; it.cost=Math.floor(it.cost*1.6); updateUI(); }
         }
     });
 };
