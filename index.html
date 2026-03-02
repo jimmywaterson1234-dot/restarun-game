@@ -3,63 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Resto Tycoon: Fixed Controls</title>
+    <title>Resto Tycoon: Final Fix</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
         body { margin: 0; background: #000; overflow: hidden; font-family: sans-serif; color: white; touch-action: none; }
-        canvas { display: block; width: 100vw; height: 100vh; }
+        canvas { display: block; }
         .ui { position: fixed; inset: 0; pointer-events: none; z-index: 100; }
         
-        /* Меню */
+        /* Главное меню */
         #menu { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; pointer-events: auto; }
-        #play-btn { padding: 15px 60px; background: #27ae60; color: #fff; border: none; font-size: 22px; font-weight: bold; cursor: pointer; }
+        #play-btn { padding: 15px 60px; background: #27ae60; color: #fff; border: none; font-size: 24px; font-weight: bold; cursor: pointer; border-radius: 10px; }
         #resto-input { padding: 12px; font-size: 18px; text-align: center; margin-bottom: 15px; width: 260px; background: #222; border: 2px solid #f1c40f; color: #fff; }
         
-        #leaderboard { background: #111; border: 1px solid #444; padding: 10px; width: 280px; margin-top: 20px; }
+        #leaderboard { background: #111; border: 1px solid #444; padding: 10px; width: 280px; margin-top: 20px; border-radius: 5px; }
         .score-line { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #222; font-size: 13px; }
 
-        /* HUD */
+        /* Игровой интерфейс */
         #stats-ui { position: fixed; top: 10px; left: 10px; pointer-events: none; }
-        #m-display { font-size: 24px; color: #f1c40f; font-weight: bold; }
+        #m-display { font-size: 26px; color: #f1c40f; font-weight: bold; text-shadow: 2px 2px #000; }
         #t-display { font-size: 18px; color: #00d2ff; }
         
-        #res-panel { position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.8); padding: 10px; border: 1px solid #555; pointer-events: auto; }
+        #res-panel { position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.8); padding: 10px; border: 1px solid #555; pointer-events: auto; border-radius: 5px; }
         .res-item { margin-bottom: 8px; font-size: 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-        .btn-buy { background: #f1c40f; border: none; padding: 5px 10px; font-weight: bold; cursor: pointer; color: #000; }
+        .btn-buy { background: #f1c40f; border: none; padding: 5px 10px; font-weight: bold; cursor: pointer; color: #000; border-radius: 3px; }
 
-        /* Джойстик и Удар */
+        /* Управление */
         #joy-base { position: fixed; bottom: 50px; left: 50px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; border: 2px solid rgba(255,255,255,0.2); pointer-events: auto; }
         #joy-stick { position: absolute; top: 35px; left: 35px; width: 50px; height: 50px; background: rgba(255,255,255,0.4); border-radius: 50%; }
-        #hit-btn { position: fixed; bottom: 60px; right: 50px; width: 90px; height: 90px; background: #e74c3c; border-radius: 50%; display: none; align-items: center; justify-content: center; pointer-events: auto; border: 4px solid #fff; font-weight: bold; font-size: 18px; }
+        #hit-btn { position: fixed; bottom: 60px; right: 50px; width: 90px; height: 90px; background: #e74c3c; border-radius: 50%; display: none; align-items: center; justify-content: center; pointer-events: auto; border: 4px solid #fff; font-weight: bold; font-size: 18px; box-shadow: 0 0 20px rgba(231, 76, 60, 0.5); }
 
-        .popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; border: 3px solid #f1c40f; padding: 25px; display: none; pointer-events: auto; text-align: center; z-index: 2000; width: 280px; }
+        .popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; border: 3px solid #f1c40f; padding: 25px; display: none; pointer-events: auto; text-align: center; z-index: 2000; width: 280px; border-radius: 10px; }
     </style>
 </head>
 <body>
 
 <div id="menu">
-    <h1 style="color:#f1c40f">RESTO TYCOON</h1>
-    <input type="text" id="resto-input" placeholder="Название ресторана..." maxlength="15">
+    <h1 style="color:#f1c40f; font-size: 40px; margin-bottom: 10px;">RESTO TYCOON</h1>
+    <input type="text" id="resto-input" placeholder="Имя ресторана..." maxlength="15">
     <button id="play-btn" onclick="initGame()">ИГРАТЬ</button>
     <div id="leaderboard">
-        <div style="color:#00d2ff; text-align:center; margin-bottom:5px;">🏆 ТОП СКОРОХОДОВ</div>
-        <div id="top-list">Загрузка...</div>
+        <div style="color:#00d2ff; text-align:center; margin-bottom:5px; font-weight: bold;">🏆 ТОП СКОРОХОДОВ</div>
+        <div id="top-list">Рекорды появятся здесь</div>
     </div>
 </div>
 
 <div id="v-popup" class="popup">
     <h3 style="color:#e74c3c">ВЫШИБАЛА</h3>
-    <p>Плати $20 или я запомню!</p>
-    <button onclick="payV(true)" style="background:green; color:#fff; padding:12px 20px; border:none; margin:5px;">ПЛАТИТЬ</button>
-    <button onclick="payV(false)" style="background:red; color:#fff; padding:12px 20px; border:none; margin:5px;">НЕТ</button>
+    <p>Плати $20 или я запомню твой отказ!</p>
+    <button onclick="payV(true)" style="background:green; color:#fff; padding:12px 20px; border:none; margin:5px; border-radius:5px; font-weight:bold;">ПЛАТИТЬ</button>
+    <button onclick="payV(false)" style="background:red; color:#fff; padding:12px 20px; border:none; margin:5px; border-radius:5px; font-weight:bold;">НЕТ</button>
 </div>
 
 <div id="final-popup" class="popup">
     <h2 id="f-title">ФИНАЛ</h2>
     <p id="f-desc"></p>
-    <button id="f-pay-btn" onclick="finish(true)" style="background:green; color:#fff; padding:15px; border:none; width:100%;">ОПЛАТИТЬ $5000</button>
-    <button onclick="location.reload()" style="background:#444; color:#fff; padding:10px; border:none; width:100%; margin-top:10px;">В МЕНЮ</button>
+    <button id="f-pay-btn" onclick="finish(true)" style="background:green; color:#fff; padding:15px; border:none; width:100%; border-radius:5px; font-weight:bold;">ОПЛАТИТЬ $5000</button>
+    <button onclick="location.reload()" style="background:#444; color:#fff; padding:10px; border:none; width:100%; margin-top:10px; border-radius:5px;">В МЕНЮ</button>
 </div>
 
 <div class="ui">
@@ -79,10 +79,13 @@
 <canvas id="game"></canvas>
 
 <script>
-// --- КОНФИГУРАЦИЯ (Замени на свои данные) ---
-const firebaseConfig = { apiKey: "AIza...", databaseURL: "https://..." };
-if (firebaseConfig.apiKey !== "AIza...") firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+// --- КОНФИГУРАЦИЯ FIREBASE ---
+const firebaseConfig = { apiKey: "ТВОЙ_КЛЮЧ", databaseURL: "ТВОЯ_ССЫЛКА" };
+let db = null;
+try {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
+} catch(e) { console.log("Firebase не подключен. Игра в офлайн режиме."); }
 
 let restoName = "", startTime = 0, gameTime = 0, active = false;
 let bat = false, hAnim = 0, kCount = 0, refusedOnce = false, isVictory = false;
@@ -102,11 +105,40 @@ const items = {
 };
 let clients = [], NPCs = [{ x: 780, y: 150, type: 'a', name: "Андрюша", t: 0 }];
 
-// --- УПРАВЛЕНИЕ ПК (Клавиатура) ---
+// --- ЛОГИКА СТАРТА ---
+function initGame() {
+    restoName = document.getElementById('resto-input').value;
+    if(!restoName) { alert("Пожалуйста, введи название ресторана!"); return; }
+    
+    document.getElementById('menu').style.display = 'none';
+    active = true;
+    startTime = Date.now();
+    
+    // Запускаем таймеры
+    setInterval(() => {
+        if(active) {
+            gameTime = Math.floor((Date.now() - startTime) / 1000);
+            document.getElementById('t-val').innerText = gameTime;
+            checkWin();
+        }
+    }, 1000);
+
+    // Спавн клиентов
+    setInterval(() => {
+        let ft = Object.values(items).find(i => i.lvl > 0 && i.status === 'free' && i.name.includes("Стол"));
+        if(active && ft && res.s>0 && res.c>0 && res.m>0) { 
+            ft.status = 'busy'; 
+            clients.push({ x: -40, y: 320, st: 'go', target: ft, t: 150, isV: Math.random() < 0.15 }); 
+        }
+    }, 4500);
+
+    loop();
+}
+
+// --- УПРАВЛЕНИЕ ---
 window.addEventListener('keydown', e => keys[e.code] = true);
 window.addEventListener('keyup', e => keys[e.code] = false);
 
-// --- УПРАВЛЕНИЕ ТЕЛЕФОН (Джойстик) ---
 let joy = { x: 0, y: 0, on: false };
 const jB = document.getElementById('joy-base'), jS = document.getElementById('joy-stick');
 
@@ -124,7 +156,7 @@ function handleJoy(e) {
     jS.style.transform = `translate(${joy.x * 35}px, ${joy.y * 35}px)`;
 }
 
-// --- КЛИКИ ПО ОБЪЕКТАМ (ПК и ТАПЫ) ---
+// Клик по столам
 canvas.addEventListener('mousedown', handleInteraction);
 canvas.addEventListener('touchstart', (e) => {
     let t = e.touches[0];
@@ -134,10 +166,8 @@ canvas.addEventListener('touchstart', (e) => {
 function handleInteraction(e) {
     if(!active) return;
     const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    const mx = (e.clientX - rect.left) * scaleX;
-    const my = (e.clientY - rect.top) * scaleY;
+    const mx = (e.clientX - rect.left) * (canvas.width / rect.width);
+    const my = (e.clientY - rect.top) * (canvas.height / rect.height);
 
     Object.values(items).forEach(it => {
         if(mx > it.x && mx < it.x + it.w && my > it.y && my < it.y + it.h) {
@@ -148,33 +178,14 @@ function handleInteraction(e) {
     });
 }
 
-function initGame() {
-    restoName = document.getElementById('resto-input').value;
-    if(!restoName) return alert("Введи название!");
-    document.getElementById('menu').style.display = 'none';
-    active = true; startTime = Date.now();
-    setInterval(() => { if(active) { gameTime = Math.floor((Date.now()-startTime)/1000); document.getElementById('t-val').innerText = gameTime; checkWin(); } }, 1000);
-    setInterval(() => {
-        let ft = Object.values(items).find(i => i.lvl > 0 && i.status === 'free');
-        if(active && ft && res.s>0 && res.c>0 && res.m>0) { 
-            ft.status = 'busy'; 
-            clients.push({ x: -40, y: 320, st: 'go', target: ft, t: 150, isV: Math.random()<0.15 }); 
-        }
-    }, 4000);
-    loop();
-}
-
+// --- ИГРОВОЙ ЦИКЛ ---
 function update() {
-    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
     
-    // Движение ПК (WASD / Arrows)
-    let moveX = 0, moveY = 0;
-    if(keys['KeyW'] || keys['ArrowUp']) moveY = -1;
-    if(keys['KeyS'] || keys['ArrowDown']) moveY = 1;
-    if(keys['KeyA'] || keys['ArrowLeft']) moveX = -1;
-    if(keys['KeyD'] || keys['ArrowRight']) moveX = 1;
-
-    // Смешиваем джойстик и кнопки
+    let moveX = (keys['KeyD'] || keys['ArrowRight'] ? 1 : 0) - (keys['KeyA'] || keys['ArrowLeft'] ? 1 : 0);
+    let moveY = (keys['KeyS'] || keys['ArrowDown'] ? 1 : 0) - (keys['KeyW'] || keys['ArrowUp'] ? 1 : 0);
+    
     let finalX = moveX || joy.x;
     let finalY = moveY || joy.y;
 
@@ -184,12 +195,13 @@ function update() {
     if(nX > room.x+20 && nX < room.x+room.w-20) player.x = nX;
     if(nY > room.y+20 && nY < room.y+room.h-20) player.y = nY;
 
-    // NPC и Клиенты
+    // Андрюша
     NPCs.forEach(n => {
         if(Math.hypot(player.x-n.x, player.y-n.y) < 45 && n.t <= 0) { money += 25; n.t = 600; upUI(); }
         if(n.t > 0) n.t--;
     });
 
+    // Клиенты
     clients.forEach((c, i) => {
         if(c.st === 'go') {
             c.x += (c.target.x - c.x) * 0.05; c.y += (c.target.y - c.y) * 0.05;
@@ -212,22 +224,18 @@ function update() {
 
 function draw() {
     ctx.clearRect(0,0,canvas.width, canvas.height);
-    // Пол
     ctx.fillStyle = "#1a1a1a"; ctx.fillRect(room.x, room.y, room.w, room.h);
-    ctx.strokeStyle = "#333"; ctx.lineWidth = 5; ctx.strokeRect(room.x, room.y, room.w, room.h);
+    ctx.strokeStyle = "#444"; ctx.lineWidth = 5; ctx.strokeRect(room.x, room.y, room.w, room.h);
     
-    // Предметы
     for(let k in items) {
         let it = items[k]; ctx.fillStyle = it.lvl === 0 ? "#000" : (it.lvl>=20 ? "#27ae60" : it.col);
         ctx.fillRect(it.x, it.y, it.w, it.h);
         ctx.fillStyle = "#fff"; ctx.font = "bold 13px Arial"; ctx.fillText(`${it.name} (${it.lvl})`, it.x, it.y - 10);
     }
 
-    // Персонажи
-    NPCs.forEach(n => { ctx.fillStyle = n.t > 0 ? "#444" : "#9b59b6"; ctx.beginPath(); ctx.arc(n.x, n.y, 22, 0, Math.PI*2); ctx.fill(); });
+    NPCs.forEach(n => { ctx.fillStyle = n.t > 0 ? "#333" : "#9b59b6"; ctx.beginPath(); ctx.arc(n.x, n.y, 22, 0, Math.PI*2); ctx.fill(); });
     clients.forEach(c => { ctx.fillStyle = c.isV ? "#e74c3c" : "#3498db"; ctx.beginPath(); ctx.arc(c.x, c.y, 20, 0, Math.PI*2); ctx.fill(); });
     
-    // Игрок
     ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(player.x, player.y, player.r, 0, Math.PI*2); ctx.fill();
     ctx.fillStyle = "#000"; ctx.fillText(hAnim > 0 ? ";)" : ":)", player.x - 8, player.y + 6);
 
@@ -244,7 +252,7 @@ function hit() {
     if(t) {
         if(t.target) t.target.status = 'free';
         clients = clients.filter(cl => cl !== t);
-        kCount++; if(kCount >= 5) { alert("АРЕСТ ЗА 5 УБИЙСТВ!"); location.reload(); }
+        kCount++; if(kCount >= 5) { alert("АРЕСТ! ТЫ ИЗБИЛ 5 ЧЕЛОВЕК."); location.reload(); }
     }
 }
 
@@ -255,25 +263,36 @@ function checkWin() {
         isVictory = true; active = false;
         const pop = document.getElementById('final-popup'); pop.style.display = 'block';
         if(refusedOnce) {
-            document.getElementById('f-title').innerText = "МЕСТЬ ВЫШИБАЛЫ";
-            document.getElementById('f-desc').innerText = "Ты не платил мне... БУМ!";
+            document.getElementById('f-title').innerText = "МЕСТЬ!";
+            document.getElementById('f-desc').innerText = "Ты не платил мне вовремя... БАБАХ!";
             document.getElementById('f-pay-btn').style.display = 'none';
         } else {
-            document.getElementById('f-title').innerText = "ВЕЛИКИЙ ПОВАР";
-            document.getElementById('f-desc').innerText = "Ты всегда платил вовремя. Финальный взнос $5000 и ты в топе!";
+            document.getElementById('f-title').innerText = "ПОБЕДА!";
+            document.getElementById('f-desc').innerText = "Ты всегда платил. Последний взнос $5000 и ты в топе!";
         }
     }
 }
 
-function finish(ok) { if(ok && money >= 5000) { db.ref('speedrun/'+restoName).set(gameTime); alert("Рекорд сохранен!"); } else { alert("Взрыв!"); } location.reload(); }
+function finish(ok) { 
+    if(ok && money >= 5000) { 
+        if(db) db.ref('speedrun/'+restoName).set(gameTime);
+        alert("Рекорд: " + gameTime + " сек. Сохранено!"); 
+    } else { alert("ВЗРЫВ!"); } 
+    location.reload(); 
+}
 
 function buyRes(t) { let p = {s:5, c:7, m:10}; if(money >= p[t]) { money -= p[t]; res[t]+=20; upUI(); } }
 function upUI() { document.getElementById('m-val').innerText = Math.floor(money); document.getElementById('r-s').innerText = res.s; document.getElementById('r-c').innerText = res.c; document.getElementById('r-m').innerText = res.m; }
-function loadTop() { db.ref('speedrun').orderByValue().limitToFirst(5).on('value', (s) => { const list = document.getElementById('top-list'); list.innerHTML = ""; s.forEach(c => { list.innerHTML += `<div class="score-line"><span>${c.key}</span><b>${c.val()}с</b></div>`; }); }); }
 
 function loop() { if(!active) return; update(); draw(); requestAnimationFrame(loop); }
-loadTop();
+
+// Загрузка топа
+if(db) {
+    db.ref('speedrun').orderByValue().limitToFirst(5).on('value', (s) => {
+        const list = document.getElementById('top-list'); list.innerHTML = "";
+        s.forEach(c => { list.innerHTML += `<div class="score-line"><span>${c.key}</span><b>${c.val()}с</b></div>`; });
+    });
+}
 </script>
 </body>
-    </html>
-    
+</html>
